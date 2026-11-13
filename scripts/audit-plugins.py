@@ -9,7 +9,9 @@
                 directory searched for .claude-plugin/plugin.json, matched by name). Entries
                 with no local copy are reported as `not-found-locally`
 --personal-terms  one term per line (names, usernames, hosts, emails, org names, IDs). Lines
-                starting with # are comments. Hits in a public plugin are errors; in a private
+                starting with # are comments. A line starting with ! is an allowed phrase,
+                removed before matching (e.g. "!Jane Doe" keeps author credit while "Jane" is
+                still caught). Hits in a public plugin are errors; in a private
                 one they tell you what would have to move to an overlay
 --visibility    ask GitHub (gh api) whether each github-sourced plugin repo is public. One call
                 per plugin
@@ -75,7 +77,7 @@ def files(root):
             yield p
 
 
-def audit_plugin(root, terms, public):
+def audit_plugin(root, terms, public, allowed=()):
     f = []
     add = lambda rule, sev, file=None, line=None, detail=None: f.append(
         {k: v for k, v in dict(rule=rule, severity=sev, file=file, line=line, detail=detail).items() if v is not None})
@@ -115,7 +117,10 @@ def audit_plugin(root, terms, public):
             if not is_license and rel != ".claude-plugin/plugin.json":
                 for t, rx in term_res:
                     if rx.search(line):
-                        bare = rx.sub("", URL.sub("", line)) != URL.sub("", line)
+                        clean = URL.sub("", line)
+                        for ph in allowed:
+                            clean = re.sub(re.escape(ph), "", clean, flags=re.I)
+                        bare = rx.search(clean) is not None
                         if bare:
                             add("personal-term", "error" if public else "info", rel, i, t)
                         else:
@@ -183,10 +188,13 @@ def main():
     a.add_argument("--only")
     a.add_argument("--assume-public", action="store_true", help="treat --plugin targets as public")
     o = a.parse_args()
-    terms = []
+    terms, allowed = [], []
     if o.personal_terms:
-        terms = [l.strip() for l in pathlib.Path(o.personal_terms).expanduser().read_text().splitlines()
-                 if l.strip() and not l.lstrip().startswith("#")]
+        for l in pathlib.Path(o.personal_terms).expanduser().read_text().splitlines():
+            l = l.strip()
+            if not l or l.startswith("#"):
+                continue
+            (allowed.append(l[1:].strip()) if l.startswith("!") else terms.append(l))
     only = set(o.only.split(",")) if o.only else None
     targets, listed = [], {}
     if o.marketplace:
@@ -223,7 +231,7 @@ def main():
             r["class"] = "not-found-locally"
             results.append(r)
             continue
-        manifest, overlay, nskills, f = audit_plugin(pathlib.Path(t["path"]), terms, bool(public))
+        manifest, overlay, nskills, f = audit_plugin(pathlib.Path(t["path"]), terms, bool(public), allowed)
         r.update({"path": str(t["path"]), "version": manifest.get("version"), "uses_overlay": overlay, "skills": nskills})
         if t["entry_version"] and manifest.get("version") and t["entry_version"] != manifest.get("version"):
             f.append({"rule": "version-drift", "severity": "warn",
