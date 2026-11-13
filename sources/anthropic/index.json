@@ -1,0 +1,68 @@
+{
+ "fetched": "2026-11-13",
+ "pages": {
+  "plugin-manifest-reference": {
+   "url": "https://code.claude.com/docs/en/plugins/manifest-reference.md",
+   "sections": {
+    "Fields": "4177d4425c2849eb",
+    "User configuration": "73309de17f014202",
+    "Environment variables": "3551ab650fed084b",
+    "Standard layout": "9e218aea0881b3b1",
+    "Marketplace entries and the manifest": "cd34abac51f06946"
+   }
+  },
+  "plugin-components": {
+   "url": "https://code.claude.com/docs/en/plugins/components.md",
+   "sections": {
+    "Ask the user for configuration values": "9f719b20d344b941",
+    "Reference plugin paths and store data": "7649ffd5ff24cfba"
+   }
+  },
+  "plugin-cli-reference": {
+   "url": "https://code.claude.com/docs/en/plugins/cli-reference.md",
+   "sections": {
+    "plugin uninstall": "35ae016cc94f3e81",
+    "plugin configure": "8132b0eea7a04b36",
+    "plugin update": "61b9df2a6ffc0de6",
+    "plugin validate": "00cc8419f1657339"
+   }
+  },
+  "plugin-loading": {
+   "url": "https://code.claude.com/docs/en/plugins/loading.md",
+   "sections": {
+    "Find plugins on disk": "69ce3ad4d1511cfc",
+    "Versions and updates": "397dfb7a05e796eb"
+   }
+  },
+  "plugin-marketplace-reference": {
+   "url": "https://code.claude.com/docs/en/plugins/marketplace-reference.md",
+   "sections": {
+    "Plugin entries": "6d356e40e93fc573",
+    "github plugin source": "a1162c17a552bfb4"
+   }
+  },
+  "claude-code-skills": {
+   "url": "https://code.claude.com/docs/en/skills.md",
+   "sections": {
+    "Frontmatter reference": "f2def2c058cf1d92",
+    "Add supporting files": "560ecc98a9afcb12",
+    "Skill content lifecycle": "8e31ed19cce97462",
+    "Skill descriptions are cut short": "188353e1a70886a2"
+   }
+  },
+  "agent-skills-best-practices": {
+   "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices.md",
+   "sections": {
+    "Concise is key": "313f5fe311a8b982",
+    "Naming conventions": "48aabb1db57e7a99",
+    "Writing effective descriptions": "e426a97901d8efe2",
+    "Progressive disclosure patterns": "70d65dcbdb561afc",
+    "Avoid deeply nested references": "e9cffcd225ac7ad8",
+    "Structure longer reference files with a table of contents": "8b7c1e69a447ffac",
+    "Avoid time-sensitive information": "061cfd9fbee5fbc2",
+    "Use consistent terminology": "a59dc3f851898056",
+    "Avoid Windows-style paths": "f8dfc848082d0f89"
+   }
+  }
+ }
+}

@@ -18,6 +18,10 @@ Stop at the first match:
 `<PLUGIN>` is the plugin name in upper case with hyphens as underscores, or a shorter
 prefix the plugin documents (typst-document-generator uses `TYPST_DOCGEN_HOME`).
 
+Not `${CLAUDE_PLUGIN_DATA}`: Claude Code deletes that directory on uninstall and keys it by
+marketplace, while the overlay holds what the user wrote. Caches belong there, but the overlay
+doesn't. See [anthropic-alignment.md](anthropic-alignment.md).
+
 Ship a small script that prints the resolved folder and the rule that picked it, so a
 user can see why the plugin is reading where it is. A generic one is in
 [reference/overlay-paths.sh](../reference/overlay-paths.sh).

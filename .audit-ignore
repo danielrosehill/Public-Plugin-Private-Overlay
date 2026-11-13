@@ -1,0 +1,3 @@
+# Quoted third-party documentation and the auditor itself
+sources/**
+scripts/audit-plugins.py

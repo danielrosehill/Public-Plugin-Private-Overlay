@@ -64,6 +64,19 @@ style preference.
 - [ ] Falls back to a local scaffold when `gh` is unavailable, and says what was lost
 - [ ] Idempotent: re-running never overwrites a file that already has content
 
+## Anthropic alignment
+
+See [anthropic-alignment.md](anthropic-alignment.md).
+
+- [ ] Nothing written under `${CLAUDE_PLUGIN_ROOT}`, or anywhere else under `~/.claude` except `${CLAUDE_PLUGIN_DATA}`
+- [ ] Caches, downloads and generated files go to `${CLAUDE_PLUGIN_DATA}` (with overlay `cache/` as the fallback outside Claude Code)
+- [ ] No user-authored content in `${CLAUDE_PLUGIN_DATA}`
+- [ ] Every `SKILL.md` is under 500 lines, with reference files one level deep
+- [ ] Every skill `name` is 64 characters or fewer, lowercase and hyphenated, without "claude" or "anthropic"
+- [ ] Every `description` is 1,024 characters or fewer, in the third person, and says what the skill does and when, key use case first
+- [ ] Any secret the plugin prompts for is a `userConfig` option with `sensitive: true`
+- [ ] `plugin.json` `version` matches the marketplace entry, or the entry omits it
+
 ## Before announcing
 
 - [ ] Installed from the marketplace with the overlay moved aside, and it still works

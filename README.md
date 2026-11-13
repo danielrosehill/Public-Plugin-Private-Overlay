@@ -20,6 +20,31 @@ Three rules follow from that:
 
 Author: Daniel Rosehill.
 
+## Built on Anthropic's guidance
+
+Claude Code gives a plugin three official places to keep things: the plugin itself
+(`${CLAUDE_PLUGIN_ROOT}`, replaced on every update), a data directory for caches and
+generated files (`${CLAUDE_PLUGIN_DATA}`, deleted on uninstall), and `userConfig` values the
+user enters when installing (secrets go to secure storage). This standard uses each of
+them for what Anthropic intends, and adds one thing they don't cover: **a consistent folder
+outside `~/.claude` for what the user writes**, which survives uninstall and can live in the
+user's own private repository. Details and sources:
+[docs/anthropic-alignment.md](docs/anthropic-alignment.md).
+
+## Use it as a plugin
+
+This repository is also an installable plugin, `public-private-overlay`:
+
+| Skill | Does |
+| --- | --- |
+| `audit-plugins` | Audits every plugin across your marketplaces against this standard and Anthropic's guidance (leaked particulars and secrets, storage, overlay conformance, skill limits, version drift), then fixes them in batches you approve |
+| `check-guidance` | Maintainers: re-reads the Anthropic docs quoted in `sources/anthropic/`, reports what changed, and updates the standard to match |
+| `setup` | Your marketplaces, repos root and a private list of personal terms |
+
+`sources/anthropic/` holds verbatim extracts of the Anthropic documentation this standard
+relies on, with the date fetched, so every rule can be traced to its source and drift can
+be detected.
+
 ## Private only when
 
 Make a plugin, or a skill, private only if one of these holds:
@@ -163,6 +188,7 @@ and offer to move it. It should not keep reading from it.
 
 | Document | Covers |
 | --- | --- |
+| [docs/anthropic-alignment.md](docs/anthropic-alignment.md) | What Anthropic's docs provide and how the standard maps onto them |
 | [AGENTS.md](AGENTS.md) | Directives for an agent building, converting or auditing a plugin |
 | [docs/overlay.md](docs/overlay.md) | The data folder: resolution, contents, load step, secrets, merge rules |
 | [docs/converting-a-private-plugin.md](docs/converting-a-private-plugin.md) | Turning an existing private plugin into a public one plus an overlay |

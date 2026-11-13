@@ -3,6 +3,11 @@
 For an agent asked to build, convert, extend or audit an agent plugin (Claude Code or
 similar). Reasoning is in [README.md](README.md) and `docs/`. This is what to do.
 
+The standard follows Anthropic's plugin and skill guidance and adds only what that guidance
+leaves open: a home for user-authored content. Mapping and sources:
+[docs/anthropic-alignment.md](docs/anthropic-alignment.md). If Anthropic's docs and this
+file disagree, the docs win; update this file.
+
 ## The shape
 
 - One public, generic plugin.
@@ -23,7 +28,9 @@ similar). Reasoning is in [README.md](README.md) and `docs/`. This is what to do
 | Formats: templates, presets, voices, layouts | Overlay `templates/`, same name as the built-in |
 | Procedure: "in my setup, always do X first" | Overlay `<skill-name>.md` |
 | Records: logs, history, state | Private workspace repository |
-| Code, built-in templates, defaults | Plugin |
+| Caches, downloads, generated files, rebuildable snapshots, dependencies | `${CLAUDE_PLUGIN_DATA}`, else overlay `cache/` |
+| Required scalar settings and secrets in Claude Code | `userConfig` (`sensitive: true` for secrets), mirrored in `profile.env` except secrets |
+| Code, built-in templates, defaults | Plugin (`${CLAUDE_PLUGIN_ROOT}`, read only) |
 
 Unsure? Ask which clock it runs on: replaced on update (plugin), true about the user
 (overlay), the thing being worked on (workspace).
@@ -38,8 +45,10 @@ First match wins:
 4. `${XDG_DATA_HOME:-~/.local/share}/claude-plugins/<plugin>/` if that root exists
 5. `~/.claude-user-data/<plugin>/`
 
-Never `${CLAUDE_PLUGIN_ROOT}`. Never the agent's config directory. `~/.claude-plugins/`
-is the superseded location: offer to migrate it, do not read it.
+Never `${CLAUDE_PLUGIN_ROOT}`. Never `${CLAUDE_PLUGIN_DATA}` or anything else under
+`~/.claude`: Claude Code deletes the data directory on uninstall, and user content must
+outlive that. `~/.claude-plugins/` is the superseded location: offer to migrate it, don't
+read it.
 
 ## Build order
 
@@ -87,6 +96,11 @@ steps that cannot be skipped:
 - No user particulars in the plugin or the template repository. Author credit is fine.
 - No secret values anywhere, and no mention of where the user keeps them.
 - Never write into `${CLAUDE_PLUGIN_ROOT}` at run time.
+- Caches go to `${CLAUDE_PLUGIN_DATA}`, user content to the overlay, never the reverse.
+- Skills meet Anthropic's limits: `SKILL.md` under 500 lines; `name` of 64 characters or fewer,
+  lowercase and hyphenated, without "claude" or "anthropic"; `description` of 1,024 characters
+  or fewer, third person, key use case first.
+- `plugin.json` `version` matches the marketplace entry, or the entry omits it.
 - Never fail because the overlay is missing.
 - Write the overlay only through `setup` or when asked, and say the path.
 - Built-in templates are read in place, never copied into the overlay.
@@ -119,15 +133,20 @@ Each finding is a bug, not a style note:
 7. Are formats looked up overlay first, by name?
 8. Are secrets named by variable only?
 9. Anything still reading `~/.claude-plugins/`?
-10. Workspace plugins: does the template run standalone, does `--check` pass, does
+10. Caches in `${CLAUDE_PLUGIN_DATA}`, nothing else written under `~/.claude`?
+11. Skill limits met (500 lines, name, description)? Manifest and marketplace versions agree?
+12. Workspace plugins: does the template run standalone, does `--check` pass, does
     creation confirm and default to private?
 
-Full list: [docs/checklist.md](docs/checklist.md).
+Full list: [docs/checklist.md](docs/checklist.md). To audit a whole marketplace and bring
+it into line, use the `audit-plugins` skill in this repository (it is also a plugin).
 
 ## Reference material
 
 | File | Use |
 | --- | --- |
+| [sources/anthropic/](sources/anthropic/) | Verbatim extracts of the Anthropic docs the rules rest on; `scripts/anthropic-guidance.py check` detects drift |
+| [scripts/audit-plugins.py](scripts/audit-plugins.py) | The audit, used by the `audit-plugins` skill |
 | [reference/overlay-paths.sh](reference/overlay-paths.sh) | Overlay resolver and overlay-first template lookup. Set the variables at the top |
 | [reference/sync-from-template.sh](reference/sync-from-template.sh) | Template sync with drift check |
 | [reference/create-workspace.SKILL.md](reference/create-workspace.SKILL.md) | Workspace creation skill |

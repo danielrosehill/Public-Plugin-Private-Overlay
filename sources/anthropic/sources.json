@@ -1,0 +1,19 @@
+{
+  "about": "Anthropic documentation this standard relies on. scripts/anthropic-guidance.py fetches each page as markdown and keeps the named sections verbatim in <slug>.md. Add a page or section here, then run `update`.",
+  "pages": [
+    {"slug": "plugin-manifest-reference", "url": "https://code.claude.com/docs/en/plugins/manifest-reference.md",
+     "sections": ["Fields", "`version`", "User configuration", "Limit a field to fixed options", "Where values are stored", "Reference a saved value", "Fields that run through a shell", "Environment variables", "Where each variable resolves", "Standard layout", "Marketplace entries and the manifest", "How entry fields combine with `plugin.json`", "Metadata precedence"]},
+    {"slug": "plugin-components", "url": "https://code.claude.com/docs/en/plugins/components.md",
+     "sections": ["Ask the user for configuration values", "When the configuration dialog appears", "Reference plugin paths and store data", "Install dependencies into the data directory"]},
+    {"slug": "plugin-cli-reference", "url": "https://code.claude.com/docs/en/plugins/cli-reference.md",
+     "sections": ["plugin uninstall", "plugin configure", "plugin update", "plugin validate"]},
+    {"slug": "plugin-loading", "url": "https://code.claude.com/docs/en/plugins/loading.md",
+     "sections": ["Find plugins on disk", "In-place and copied plugins", "Paths that escape the plugin directory", "Cleanup of previous versions", "Versions and updates", "How Claude Code computes the version", "When auto-update runs"]},
+    {"slug": "plugin-marketplace-reference", "url": "https://code.claude.com/docs/en/plugins/marketplace-reference.md",
+     "sections": ["Plugin entries", "How an entry combines with plugin.json", "Strict mode", "github plugin source"]},
+    {"slug": "claude-code-skills", "url": "https://code.claude.com/docs/en/skills.md",
+     "sections": ["Frontmatter reference", "Add supporting files", "Skill content lifecycle", "Skill descriptions are cut short"]},
+    {"slug": "agent-skills-best-practices", "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices.md",
+     "sections": ["Concise is key", "Naming conventions", "Writing effective descriptions", "Progressive disclosure patterns", "Avoid deeply nested references", "Structure longer reference files with a table of contents", "Avoid time-sensitive information", "Use consistent terminology", "Avoid Windows-style paths"]}
+  ]
+}
