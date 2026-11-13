@@ -1,117 +1,133 @@
-# Building a PWV plugin — instructions for an agent
+# Public plugin, private overlay: directives for agents
 
-Directives for an agent asked to build, extend or audit a Claude Code plugin following
-the Plugin–Workspace–Vault pattern. The reasoning is in [README.md](README.md) and
-`docs/`; this is what to *do*.
+For an agent asked to build, convert, extend or audit an agent plugin (Claude Code or
+similar). Reasoning is in [README.md](README.md) and `docs/`. This is what to do.
 
-## First, check the pattern applies
+## The shape
 
-PWV is overhead. Do not apply it because it was asked for by name if the plugin does not
-need it — say so instead. It fits when **at least two** hold:
+- One public, generic plugin.
+- Everything about the user in the overlay, a data folder outside the plugin.
+- Never a parallel private fork.
+- A private companion plugin only if a skill passes a "private only when" test:
+  nothing useful is left without the particulars; its existence is sensitive or
+  belongs to a client or employer; or the owner has a standing rule covering it.
+- A private workspace repository, from a public template, only for plugins that
+  accumulate work.
 
-- Work accumulates across sessions and the user returns to it
-- There is state a user would want to read, correct, diff or keep
-- Settings must survive `/plugin update`
-- Output must stay usable with the plugin uninstalled
+## Placing a particular
 
-One of these alone is usually a vault and nothing more.
-
-## Placing a file
-
-Ask which clock it runs on. This answers nearly every case:
-
-| Question | Leg |
+| Particular | Home |
 | --- | --- |
-| Thrown away and replaced on `/plugin update`? | Plugin |
-| The thing being worked on; would you want its history? | Workspace |
-| True about the *user*, not the project; unhappy to commit it? | Vault |
+| Values: hosts, IDs, emails, paths, account names | Overlay `profile.env` |
+| Secrets | Environment variable name in the skill. Never a value, never a location |
+| Formats: templates, presets, voices, layouts | Overlay `templates/`, same name as the built-in |
+| Procedure: "in my setup, always do X first" | Overlay `<skill-name>.md` |
+| Records: logs, history, state | Private workspace repository |
+| Code, built-in templates, defaults | Plugin |
 
-Never write into `${CLAUDE_PLUGIN_ROOT}` at run time. It works until the first update
-and then loses data silently.
+Unsure? Ask which clock it runs on: replaced on update (plugin), true about the user
+(overlay), the thing being worked on (workspace).
+
+## Overlay location
+
+First match wins:
+
+1. `$<PLUGIN>_HOME`
+2. `$CLAUDE_USER_DATA/<plugin>/`
+3. `~/.claude-user-data/<plugin>/` if `~/.claude-user-data` exists
+4. `${XDG_DATA_HOME:-~/.local/share}/claude-plugins/<plugin>/` if that root exists
+5. `~/.claude-user-data/<plugin>/`
+
+Never `${CLAUDE_PLUGIN_ROOT}`. Never the agent's config directory. `~/.claude-plugins/`
+is the superseded location: offer to migrate it, do not read it.
 
 ## Build order
 
-1. **Template repo first.** Define the working structure and the skills that operate on
-   it. Mark it as a template repository on GitHub. It must be usable standalone by
-   cloning — if it needs the plugin, the split is wrong.
-2. **Plugin second**, vendoring from the template. Add only the skills that create or
-   manage a workspace, plus commands and MCP declarations.
-3. **Vault last**, once you know which questions the plugin asks every time. Those are
-   the config keys, and no others.
+1. **Sort the particulars** with the table above.
+2. **Write the generic skill** in the public plugin: load step at the top, `## Data
+   storage` section at the end, defaults that work with no overlay, overlay-first
+   lookup for formats.
+3. **Add or extend `setup`** with any new `profile.env` keys. Document each key: name,
+   skills that use it, default.
+4. **Write the user's particulars to their overlay** so their first run behaves as
+   intended. If the user-data root is a git repository, stage only this plugin's folder.
+5. **Grep the public diff** for the user's names, hosts, IDs and emails. Hits go to the
+   overlay.
+6. **Workspace, if needed:** template repository first (usable standalone), plugin
+   second.
+7. **Report both halves:** what is public, and what was kept private and where.
 
-Doing it in this order stops the template becoming a dumping ground for whatever the
-plugin found inconvenient.
+The load step, verbatim:
+
+```markdown
+## 1. Load your settings
+
+Find the data folder: `$<PLUGIN>_HOME`, `$CLAUDE_USER_DATA/<plugin>/`, then
+`~/.claude-user-data/<plugin>/`. Read `profile.env` and `<skill-name>.md` if they
+exist. They win over the defaults below. If there is no profile, use the defaults
+and offer `setup` at the end.
+```
+
+## Converting a private plugin
+
+Follow [docs/converting-a-private-plugin.md](docs/converting-a-private-plugin.md). The
+steps that cannot be skipped:
+
+- Get the owner's yes before anything is published.
+- Write their particulars to the overlay in the same pass.
+- Private history: keep a git bundle, create a **new** repository from one clean commit,
+  confirm an old SHA returns 404, then make it public. Never flip visibility. Never
+  trust a squash or force-push: GitHub serves old commits by SHA.
+- Skills with nothing generic left move to a fitting private plugin.
+- Move the marketplace entry from private to public in the same change.
+- Delete the old repository once the new one is live.
 
 ## Non-negotiables
 
-**The template repo is canonical.** A change to a shared file goes there first, then
-reaches the plugin through the sync. The other direction works once, then the next sync
-reverts it.
+- No user particulars in the plugin or the template repository. Author credit is fine.
+- No secret values anywhere, and no mention of where the user keeps them.
+- Never write into `${CLAUDE_PLUGIN_ROOT}` at run time.
+- Never fail because the overlay is missing.
+- Write the overlay only through `setup` or when asked, and say the path.
+- Built-in templates are read in place, never copied into the overlay.
+- The template repository is canonical for shared files; vendored copies stay
+  byte-identical.
 
-**Vendored copies stay byte-identical.** No local adjustments. `--check` is worthless
-the moment one file legitimately differs.
-
-**Plugin-owned skill names live in a list**, not hardcoded in each place the sync
-touches them. Two of them arrives sooner than expected.
-
-**No credential values anywhere.** Vault holds pointers — `op://` references, env var
-names. MCP servers use `${ENV_VAR}` indirection in `.mcp.json`.
-
-**No user-specific defaults in the plugin or the template.** A GitHub username in a
-public template becomes every fork's default.
-
-**Never write the vault unprompted.** Read it always; write only when asked; say the
-path when you do.
-
-**Never fail because the vault is missing.** A first run works with no setup.
-
-## Creating a workspace
+## Workspace creation
 
 ```bash
 gh repo create <name> --template <owner>/<template> --private --clone
 ```
 
-- **Private by default.** Confirm explicitly before running — creating a repo is
-  outward-facing and not something to do on inference. Show the exact command.
-- **State what the repo will hold** in that confirmation, so a `--public` choice is made
-  knowingly rather than by an unread default.
-- Read `template` from the vault if set, so a user's fork wins over the author's.
-- No wait loop needed; `gh` handles the instantiation race.
-- Afterwards: write the marker file, replace the template's README with a status page
-  for this project, commit, push.
-- Fall back to a local scaffold if `gh` is missing, and say what was lost.
+- Private by default. Show the exact command and get a yes; say what the repository
+  will hold.
+- Read the template from the overlay (`<PLUGIN>_TEMPLATE`) if set, so a fork wins.
+- Write the marker file `.<plugin>` ([reference/marker-file.md](reference/marker-file.md)),
+  replace the template README with a status page, commit, push.
+- No `gh`: fall back to a local scaffold and say what was lost.
 
-## The marker file
+## Audit checklist
 
-`.<plugin-name>` at the workspace root. Find it by searching the current directory and
-then upward — never assume the enclosing git repo is the workspace.
+Each finding is a bug, not a style note:
 
-```yaml
-created: <YYYY-MM-DD>
-template: <owner>/<repo>
-template_version: <plugin version>
-backing: github          # github | local
-repo: <owner>/<name>
-workspace_root: .
-```
+1. Anything written into the plugin directory at run time?
+2. Any name, username, host, email, ID, home path or secret location in a public repo?
+3. A private fork or a private duplicate of a public skill?
+4. Does every skill have the load step and a `## Data storage` section?
+5. Does a first run work with no overlay?
+6. Is there a `setup` skill, and are all `profile.env` keys documented with defaults?
+7. Are formats looked up overlay first, by name?
+8. Are secrets named by variable only?
+9. Anything still reading `~/.claude-plugins/`?
+10. Workspace plugins: does the template run standalone, does `--check` pass, does
+    creation confirm and default to private?
 
-## Auditing an existing plugin
+Full list: [docs/checklist.md](docs/checklist.md).
 
-Check, in this order — each finding is a real bug, not a style note:
-
-1. Does anything write into the plugin directory at run time? → will be wiped
-2. Any credential value, GitHub username or personal path in either public repo?
-3. Does the template clone and run standalone, with the plugin uninstalled?
-4. Does `--check` pass, and are vendored copies byte-identical?
-5. Is the plugin-owned skill list a list?
-6. Does a first run work with no vault present?
-7. Does workspace creation confirm before creating, and default to private?
-8. Do the shipped/user merge rules state conflict, list and freshness behaviour?
-
-## Reference material to copy
+## Reference material
 
 | File | Use |
 | --- | --- |
-| [`reference/sync-from-template.sh`](reference/sync-from-template.sh) | Drop in, set four variables at the top |
-| [`reference/create-workspace.SKILL.md`](reference/create-workspace.SKILL.md) | Fill-in-the-blanks workspace creation skill |
-| [`docs/checklist.md`](docs/checklist.md) | Run before shipping |
+| [reference/overlay-paths.sh](reference/overlay-paths.sh) | Overlay resolver and overlay-first template lookup. Set the variables at the top |
+| [reference/sync-from-template.sh](reference/sync-from-template.sh) | Template sync with drift check |
+| [reference/create-workspace.SKILL.md](reference/create-workspace.SKILL.md) | Workspace creation skill |

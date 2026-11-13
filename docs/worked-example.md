@@ -1,15 +1,38 @@
-# Worked example — spec-led-certification
+# Worked examples
 
-A real three-legged system, built August 2026. Everything below is live and inspectable.
+## Overlay plugins
 
-| Leg | Repo / path | Visibility |
+**typst-document-generator 0.6.0 (2026-11-02).** The first plugin built on the overlay.
+It ships generic document templates. The owner's identity, business, logo and own
+formats live in `~/.claude-user-data/typst-document-generator/` (or
+`$TYPST_DOCGEN_HOME`). Its `scripts/paths.sh` resolves the folder in the standard order
+and lists templates overlay first, the user's copy winning by name. It predates the
+`profile.env` convention and keeps its own `profile.yaml`, which the standard allows.
+[Repository](https://github.com/danielrosehill/typst-document-generator-plugin).
+
+**hf-ops (private) → hugging-face (public, danielrosehill/Hugging-Face-Plugin),
+2026-11-13.** A conversion of a private plugin. Account, organisations, collection
+names, export folder and support address became `profile.env` keys with generic
+defaults. Secrets are named by variable (`HF_TOKEN` and an S3 key pair). The data
+folder is `~/.claude-user-data/hugging-face/`. 18 skills went public in a new
+repository. Two backup skills had nothing generic left and moved to a private backup
+plugin. The procedure is in
+[converting-a-private-plugin.md](converting-a-private-plugin.md).
+[Repository](https://github.com/danielrosehill/Hugging-Face-Plugin).
+
+## Workspace plugin: spec-led-certification
+
+A system with all three parts, built August 2026. It predates the overlay and used the
+superseded `~/.claude-plugins/` location; the table gives the current equivalent.
+
+| Part | Repo / path | Visibility |
 | --- | --- | --- |
 | Plugin | [spec-led-certification-plugin](https://github.com/danielrosehill/spec-led-certification-plugin) | Public |
 | Template | [Spec-Led-Certification](https://github.com/danielrosehill/Spec-Led-Certification) | Public, marked as a GitHub template |
 | Workspace | One private repo per search, instantiated from the template | Private |
-| Vault | `~/.claude-plugins/spec-led-certification/` | Local |
+| Overlay | `~/.claude-user-data/spec-led-certification/` (originally `~/.claude-plugins/spec-led-certification/`) | Private, local |
 
-## What it does
+### What it does
 
 Chooses a professional certification specification-first: it interviews you, derives a
 weighted scorecard from your answers alone, **freezes it before any credential is looked
@@ -19,7 +42,7 @@ That freeze is why the workspace has to be a repo. The claim "the scorecard was 
 before the research ran" is only worth anything if it can be checked, and a commit
 timestamp checks it. A folder cannot.
 
-## How the legs divide
+### How the parts divide
 
 **Plugin** — 14 skills, 3 subagents, one command. Twelve of the skills and all three
 agents are vendored from the template; two are plugin-owned:
@@ -42,10 +65,10 @@ a second search on the same subject two years later is a different repo rather t
 overwrite. Holds the profile, the frozen scorecard, the research with its sources, the
 reports, and archived previous runs.
 
-**Vault** — `owner`, `visibility`, `workspace_parent`, `naming`, and the `template`
+**Overlay** — owner, visibility, workspace parent, naming, and the template
 override. Without it `create-workspace` asks four questions; with it, one confirmation.
 
-## Points where the pattern earned itself
+### Points where the pattern earned itself
 
 **The freeze is evidenced by git.** Three mechanisms enforce it, and the one that
 actually settles arguments is the commit ordering. Nothing in a folder-based design
@@ -55,9 +78,9 @@ could have provided it.
 repo is not a data directory for a tool — it is a self-contained record of a decision,
 readable by whatever comes next.
 
-**The vault kept personal defaults out of two public repos.** A GitHub username and a
+**The overlay kept personal defaults out of two public repos.** A GitHub username and a
 preference for private repos are unremarkable, and neither belongs in a repository
-strangers clone. Without the third leg they would have ended up in the template as
+strangers clone. Without the overlay they would have ended up in the template as
 "defaults", and every fork would have inherited them.
 
 **Instantiation is not a fork.** `gh repo create --template` produces a squashed
@@ -65,7 +88,7 @@ strangers clone. Without the third leg they would have ended up in the template 
 later. That sounds like a limitation and is the correct behaviour here: changing the
 skills underneath a frozen scorecard is exactly the drift the method exists to prevent.
 
-## Things learned building it
+### Things learned building it
 
 **`gh repo create --template --clone` handles the instantiation race itself.** Template
 population is asynchronous and an immediate clone can in principle come back empty. It
@@ -82,7 +105,7 @@ with a list. Use a list from the start.
 what makes `--check` mean anything; one legitimate difference and the check reports
 drift forever and everyone stops reading it.
 
-## Reading it
+### Reading it
 
 The clearest single file is the plugin's
 [`scripts/sync-from-template.sh`](https://github.com/danielrosehill/spec-led-certification-plugin/blob/main/scripts/sync-from-template.sh) —

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Refresh this plugin's vendored copy of its template repo.
 #
-# Reference implementation for the Plugin-Workspace-Vault pattern:
-#   https://github.com/danielrosehill/Claude-Plugin-Workspace-Vault
+# Reference implementation for the Public Plugin, Private Overlay standard:
+#   https://github.com/danielrosehill/Public-Plugin-Private-Overlay
 #
 # Set the four variables below and drop this in at scripts/sync-from-template.sh.
 #

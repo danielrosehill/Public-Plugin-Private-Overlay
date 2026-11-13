@@ -55,8 +55,8 @@ self-describing rather than a marker whose meaning lives only in the plugin.
 
 ## Do not
 
-**Do not put user configuration in it.** That is the vault's job. The marker describes
-the *workspace*; the vault describes the *user*. Mixing them means a workspace commits
+**Do not put user configuration in it.** That is the overlay's job. The marker describes
+the *workspace*; the overlay describes the *user*. Mixing them means a workspace commits
 someone's preferences into a repo they may later share.
 
 **Do not put state in it.** Progress, stage completion and status belong in the working

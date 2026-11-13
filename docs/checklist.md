@@ -1,65 +1,72 @@
 # Ship checklist
 
-Run before publishing a PWV plugin or cutting a release. Each item is a real failure
-that has happened, not a style preference.
+Run before publishing a plugin or cutting a release. Each item is a real failure, not a
+style preference.
 
 ## Separation
 
 - [ ] Nothing is written into `${CLAUDE_PLUGIN_ROOT}` at run time
-- [ ] No credential values in the plugin repo, the template repo, or any committed file
-- [ ] No personal defaults — GitHub username, absolute home paths, machine names — in
-      either public repo
-- [ ] The template's blank data files are actually blank: header-only CSVs, unfilled
-      forms, no leftover answers from testing in the template checkout
+- [ ] No secret values, and no mention of where the user keeps secrets, in any public
+      repository
+- [ ] No user particulars in the plugin or the template: names, usernames, hostnames,
+      emails, account and project IDs, org names, home paths. Grep for them
+- [ ] No parallel private fork exists; private skills, if any, live in a fitting private
+      plugin and pass a "private only when" test
 - [ ] MCP servers declare `${ENV_VAR}` indirection rather than embedded URLs or keys
 
-## Template repo
+## Overlay
 
-- [ ] Marked as a **template repository** in GitHub settings — without this,
-      `gh repo create --template` fails
-- [ ] Clones and runs standalone with the plugin uninstalled
-- [ ] Carries its own `AGENTS.md` and method docs, so an instance explains itself
-- [ ] Its README describes the *template*; the workspace-creating skill replaces it in
-      each instance
+- [ ] A `setup` skill writes `profile.env`, asking only for what it cannot detect
+- [ ] Every skill has the load step at the top and a `## Data storage` section
+- [ ] The resolver follows the order: `$<PLUGIN>_HOME`, `$CLAUDE_USER_DATA/<plugin>/`,
+      `~/.claude-user-data/<plugin>/` if that root exists, the XDG `claude-plugins` root
+      if it exists, then `~/.claude-user-data/<plugin>/`
+- [ ] Every `profile.env` key is documented: name, skills that use it, default
+- [ ] A first run works with no overlay
+- [ ] Formats are looked up overlay first, by name; built-ins are read in place
+- [ ] Secrets are named by environment variable only
+- [ ] Nothing reads the superseded `~/.claude-plugins/<plugin>/`
+- [ ] Nothing is written to the overlay unprompted, and the path is stated when it is
+- [ ] Merge rules for shipped-vs-user data state conflict, list and freshness behaviour
 
 ## Plugin
 
 - [ ] `plugin.json` parses; `name` matches the marketplace entry
+- [ ] The plugin is listed in one marketplace only, the public one
 - [ ] Every skill's frontmatter `name` matches its directory name
-- [ ] Every skill and command has a `description` that says *when* to use it, not only
-      what it does
+- [ ] Every skill and command has a `description` that says *when* to use it
 - [ ] Version bumped, including for changes that only touched vendored files
 - [ ] Plugin-owned skills are in a **list**, not hardcoded per call site
+
+## Template repository (workspace plugins)
+
+- [ ] Marked as a **template repository** in GitHub settings, or
+      `gh repo create --template` fails
+- [ ] Clones and runs standalone with the plugin uninstalled
+- [ ] Carries its own `AGENTS.md` and method docs
+- [ ] Its blank data files are blank: header-only CSVs, unfilled forms
+- [ ] Its README describes the template; the creating skill replaces it per instance
 
 ## Sync
 
 - [ ] `--check` passes
 - [ ] Vendored copies are byte-identical to the template
-- [ ] Sync works from a local checkout *and* from a clean clone of the upstream
+- [ ] Sync works from a local checkout and from a clean clone of the upstream
 - [ ] It refuses, rather than warns, if the template's data files carry rows
-
-## Vault
-
-- [ ] A first run works with no vault present
-- [ ] Nothing is written to the vault unprompted
-- [ ] The path is stated when something is written there
-- [ ] The `template` override is honoured, so a fork wins over the author's default
-- [ ] Merge rules for shipped-vs-user data state conflict, list and freshness behaviour
-- [ ] Credentials are pointers only
 
 ## Workspace creation
 
 - [ ] Confirms before creating, showing the exact command
-- [ ] Defaults to private, and states what the repo will hold
+- [ ] Defaults to private, and states what the repository will hold
+- [ ] Honours `<PLUGIN>_TEMPLATE` from the overlay
 - [ ] Writes the marker file with `template`, `template_version` and `backing`
-- [ ] Finds an existing workspace by searching upward for the marker, not by assuming
-      the enclosing git repo
+- [ ] Finds an existing workspace by searching upward for the marker
 - [ ] Falls back to a local scaffold when `gh` is unavailable, and says what was lost
 - [ ] Idempotent: re-running never overwrites a file that already has content
 
 ## Before announcing
 
-- [ ] Installed from the marketplace on a machine that is not the author's, or with the
-      vault temporarily moved aside
-- [ ] One full workspace created, used, and re-opened in a fresh session
-- [ ] `/plugin update` simulated — reinstall over the top — and nothing was lost
+- [ ] Installed from the marketplace with the overlay moved aside, and it still works
+- [ ] The owner's own run, with their overlay, behaves as intended
+- [ ] An update simulated (reinstall over the top) and nothing was lost
+- [ ] For a converted private plugin: new repository, an old SHA returns 404

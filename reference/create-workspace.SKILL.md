@@ -4,8 +4,8 @@ description: Create a private GitHub repository from the <PLUGIN> template and c
 ---
 
 <!--
-  Reference skill for the Plugin-Workspace-Vault pattern:
-  https://github.com/danielrosehill/Claude-Plugin-Workspace-Vault
+  Reference skill for the Public Plugin, Private Overlay standard:
+  https://github.com/danielrosehill/Public-Plugin-Private-Overlay
 
   Replace <PLUGIN>, <TEMPLATE-REPO>, <PROJECT-NOUN> and the config keys.
   Everything else is the pattern and should survive adaptation.
@@ -38,22 +38,24 @@ gh auth status
 If `gh` is missing or unauthenticated, say so and offer the local path. Do not work
 around it — a half-created repo is worse than a folder.
 
-## Read the vault first
+## 1. Load your settings
 
-`~/.claude-plugins/<PLUGIN>/config.yaml`:
+Find the data folder: `$<PLUGIN>_HOME`, `$CLAUDE_USER_DATA/<PLUGIN>/`, then
+`~/.claude-user-data/<PLUGIN>/`. Read `profile.env` and `create-workspace.md` if they
+exist. They win over the defaults below. If there is no profile, ask, and offer `setup`
+at the end so the second run is one confirmation. Never write the profile unprompted.
 
-```yaml
-owner: <github-user-or-org>
-visibility: private
-workspace_parent: ~/repos
-naming: "{subject}-{mmyy}"
-template: <owner>/<TEMPLATE-REPO>    # a fork wins over the author's default
+Keys this skill reads (prefix with the plugin's own name):
+
+```sh
+<PLUGIN>_OWNER=<github-user-or-org>        # default: the authenticated gh user
+<PLUGIN>_VISIBILITY=private                # default: private
+<PLUGIN>_WORKSPACE_PARENT=~/repos          # default: ask
+<PLUGIN>_NAMING={subject}-{mmyy}           # default: as shown
+<PLUGIN>_TEMPLATE=<owner>/<TEMPLATE-REPO>  # default: the author's template
 ```
 
-If it exists, use it and stop asking what it answers. If not, ask, and **offer to
-write it at the end** so the second run is one confirmation. Never write it unprompted.
-
-Honour `template` — that key is what makes the system forkable rather than locked to
+Honour `<PLUGIN>_TEMPLATE`. That key makes the system forkable rather than locked to
 the plugin author.
 
 ## Choose the name
@@ -115,7 +117,13 @@ work in progress.
 ## Then
 
 Say where the repo is — local path and URL — and confirm it is private. Offer to save
-anything they answered that the vault could have.
+anything they answered to `profile.env` through `setup`.
+
+## Data storage
+
+Reads `profile.env` and `create-workspace.md` from the overlay. Writes nothing there
+unless the user accepts the offer to save. Writes the new workspace repository and its
+marker file.
 
 Hand off to the first working skill as a **separate step**. Creating a repo is
 infrastructure; give them a chance to look at it before starting the real work.

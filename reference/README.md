@@ -1,14 +1,28 @@
 # Reference implementations
 
 Files to copy into a plugin and adapt. Each is a working version of one part of the
-pattern, generalised from
-[spec-led-certification](../docs/worked-example.md).
+standard, generalised from the plugins in [docs/worked-example.md](../docs/worked-example.md).
 
 | File | Drop into | Adapt |
 | --- | --- | --- |
+| [overlay-paths.sh](overlay-paths.sh) | `scripts/` | `NAME`, `HOME_VAR`, `TEMPLATE_GLOB`, `BUILTIN_TEMPLATES` at the top |
 | [sync-from-template.sh](sync-from-template.sh) | `scripts/` | Four variables at the top: `UPSTREAM_REPO`, `DEFAULT_LOCAL`, `PLUGIN_OWNED_SKILLS`, `WORKSPACE_PATHS`, plus `EMPTY_ON_SHIP` |
-| [create-workspace.SKILL.md](create-workspace.SKILL.md) | `skills/create-workspace/SKILL.md` | `<PLUGIN>`, `<TEMPLATE-REPO>`, `<PROJECT-NOUN>`, config keys |
+| [create-workspace.SKILL.md](create-workspace.SKILL.md) | `skills/create-workspace/SKILL.md` | `<PLUGIN>`, `<TEMPLATE-REPO>`, `<PROJECT-NOUN>`, `profile.env` keys |
 | [marker-file.md](marker-file.md) | — | Spec for the workspace marker; implement in your creation skill |
+
+## overlay-paths.sh
+
+Resolves the plugin's overlay folder in the standard order and looks up templates
+overlay first.
+
+```bash
+./scripts/overlay-paths.sh              # folder, the rule that picked it, profile state
+./scripts/overlay-paths.sh templates    # every template, user copies first
+./scripts/overlay-paths.sh template X   # path of X, the user's copy if there is one
+```
+
+It reports the superseded `~/.claude-plugins/<plugin>/` folder if one exists, and never
+reads it. Generalised from typst-document-generator's `scripts/paths.sh`.
 
 ## sync-from-template.sh
 
