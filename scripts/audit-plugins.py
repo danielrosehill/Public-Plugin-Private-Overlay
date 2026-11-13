@@ -173,6 +173,13 @@ def find_local(roots):
     return idx
 
 
+def remote_repo(path):
+    """owner/name of the GitHub remote of the git repo containing path, or None."""
+    r = subprocess.run(["git", "-C", str(path), "remote", "get-url", "origin"], capture_output=True, text=True)
+    m = re.search(r"github\.com[:/]([^/]+/[^/\s]+?)(?:\.git)?\s*$", r.stdout)
+    return m.group(1) if m else None
+
+
 def gh_public(repo):
     r = subprocess.run(["gh", "api", f"repos/{repo}", "-q", ".private"], capture_output=True, text=True)
     return None if r.returncode else r.stdout.strip() == "false"
@@ -210,6 +217,8 @@ def main():
                 path = None
                 if isinstance(src, str) and src.startswith("./"):
                     path = pathlib.Path(mp).expanduser().resolve().parents[1] / src
+                if path and not repo:
+                    repo = remote_repo(pathlib.Path(mp).expanduser().resolve().parent)  # in-marketplace plugin
                 targets.append({"name": e["name"], "marketplace": m.get("name", mp), "repo": repo,
                                 "entry_version": e.get("version"), "path": path or idx.get(e["name"])})
     for p in o.plugin:
