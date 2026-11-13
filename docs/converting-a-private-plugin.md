@@ -105,14 +105,20 @@ called `onboard`, and it predates the `profile.env` convention, so it keeps its 
 is reported and never read; `onboard` offers to move it. Repository:
 [typst-document-generator-plugin](https://github.com/danielrosehill/typst-document-generator-plugin).
 
-**hf-ops (private) → hugging-face (public, danielrosehill/Hugging-Face-Plugin), 2026-11-13.**
-A private Hugging Face Hub plugin whose skills named the owner's account,
-organisations, collection names, export folder and support email. The conversion moved
-those into `profile.env` keys (default owner, owners list, default visibility, naming
-style, export folder, collection names), each with a default that works for a stranger,
-and named the secrets by variable only (`HF_TOKEN`, `HF_S3_ACCESS_KEY_ID`,
-`HF_S3_SECRET_ACCESS_KEY`). 18 skills were published under a new repository,
-[Hugging-Face-Plugin](https://github.com/danielrosehill/Hugging-Face-Plugin), with the
-data folder at `~/.claude-user-data/hugging-face/`. Two backup skills checked one
-person's backup arrangement end to end and had nothing generic left; they moved to a
-private backup plugin.
+**hf-ops (private) → hf-research + hf-publisher-tools (both public), 2026-11-13.**
+A private Hugging Face Hub plugin whose skills named the owner's account, organisations,
+collection names, export folder and support email. The conversion moved those into
+`profile.env` keys (default owner, owners list, default visibility, naming style, export
+folder, collection names), each with a default that works for a stranger, and named the
+secrets by variable only (`HF_TOKEN`, `HF_S3_ACCESS_KEY_ID`, `HF_S3_SECRET_ACCESS_KEY`).
+During the conversion the skills split by audience into two new repositories:
+[HF-Research-Plugin](https://github.com/danielrosehill/HF-Research-Plugin) (task-first model
+research, gated access) and
+[HF-Publisher-Tools-Plugin](https://github.com/danielrosehill/HF-Publisher-Tools-Plugin)
+(repos, Spaces, collections, access-request review). Each has its own data folder. Two
+backup skills checked one person's backup arrangement end to end and had nothing generic
+left, so they moved to a private backup plugin. The old private repository was deleted once
+both were live, and its history was kept in a local bundle.
+
+A split is worth considering whenever a conversion is under way: the audiences of a private
+plugin's skills often differ, and the rewrite touches every file anyway.

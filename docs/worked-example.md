@@ -10,15 +10,16 @@ and lists templates overlay first, the user's copy winning by name. It predates 
 `profile.env` convention and keeps its own `profile.yaml`, which the standard allows.
 [Repository](https://github.com/danielrosehill/typst-document-generator-plugin).
 
-**hf-ops (private) → hugging-face (public, danielrosehill/Hugging-Face-Plugin),
-2026-11-13.** A conversion of a private plugin. Account, organisations, collection
-names, export folder and support address became `profile.env` keys with generic
-defaults. Secrets are named by variable (`HF_TOKEN` and an S3 key pair). The data
-folder is `~/.claude-user-data/hugging-face/`. 18 skills went public in a new
-repository. Two backup skills had nothing generic left and moved to a private backup
-plugin. The procedure is in
+**hf-ops (private) → hf-research + hf-publisher-tools (both public), 2026-11-13.** A
+conversion of a private plugin that was also split by audience: finding and using models
+([HF-Research-Plugin](https://github.com/danielrosehill/HF-Research-Plugin)) and publishing
+([HF-Publisher-Tools-Plugin](https://github.com/danielrosehill/HF-Publisher-Tools-Plugin)).
+Account, organisations, collection names, export folder, support address, access-request
+policy and gate-form answers became `profile.env` keys and per-skill notes, each plugin with
+its own data folder (`~/.claude-user-data/hf-research/`, `~/.claude-user-data/hf-publisher-tools/`).
+Secrets are named by variable (`HF_TOKEN` and an S3 key pair). Two backup skills had nothing
+generic left and moved to a private backup plugin. The procedure is in
 [converting-a-private-plugin.md](converting-a-private-plugin.md).
-[Repository](https://github.com/danielrosehill/Hugging-Face-Plugin).
 
 ## Workspace plugin: spec-led-certification
 
