@@ -32,7 +32,7 @@ SECRET = [
     (r"\bgh[pousr]_[A-Za-z0-9]{30,}\b", "GitHub token"),
     (r"\bgithub_pat_[A-Za-z0-9_]{40,}\b", "GitHub fine-grained token"),
     (r"\bAKIA[0-9A-Z]{16}\b", "AWS access key id"),
-    (r"\bop://[^\s\"'`)]+", "1Password secret reference"),
+    (r"\bop://(?![<$]|vault/|Vault/|VAULT/)[^\s\"'`)]+", "1Password secret reference"),
 ]
 WRITE_ROOT = [
     r"(>>?|tee\s+(-a\s+)?|mkdir\s+-p\s+|cp\s+[^\n]*\s|mv\s+[^\n]*\s|touch\s+)\"?\$\{?CLAUDE_PLUGIN_ROOT",
@@ -67,9 +67,20 @@ def ignored(root):
     return lambda rel: any(pathlib.PurePath(rel).match(p) or rel.startswith(p.rstrip("*").rstrip("/") + "/") for p in pats)
 
 
+def tracked(root):
+    """Files git tracks under root (what is actually published), or None if not a git checkout."""
+    r = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "--", "."], capture_output=True, text=True)
+    if r.returncode:
+        return None
+    return {(root / f).resolve() for f in r.stdout.split("\0") if f}
+
+
 def files(root):
     skip = ignored(root)
+    keep = tracked(root)
     for p in sorted(root.rglob("*")):
+        if keep is not None and p.resolve() not in keep:
+            continue
         if skip(str(p.relative_to(root))):
             continue
         if p.is_file() and ".git" not in p.parts and "__pycache__" not in p.parts and \
