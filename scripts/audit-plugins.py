@@ -32,7 +32,7 @@ SECRET = [
     (r"\bgh[pousr]_[A-Za-z0-9]{30,}\b", "GitHub token"),
     (r"\bgithub_pat_[A-Za-z0-9_]{40,}\b", "GitHub fine-grained token"),
     (r"\bAKIA[0-9A-Z]{16}\b", "AWS access key id"),
-    (r"\bop://(?![<$]|vault/|Vault/|VAULT/)[^\s\"'`)]+", "1Password secret reference"),
+    (r"\bop://(?![<$.]|vault/|Vault/|VAULT/)[^\s\"'`)]+", "1Password secret reference"),
 ]
 WRITE_ROOT = [
     r"(>>?|tee\s+(-a\s+)?|mkdir\s+-p\s+|cp\s+[^\n]*\s|mv\s+[^\n]*\s|touch\s+)\"?\$\{?CLAUDE_PLUGIN_ROOT",
